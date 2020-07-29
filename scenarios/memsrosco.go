@@ -3,12 +3,13 @@ package scenarios
 import (
 	"encoding/csv"
 	"fmt"
-	"github.com/andrewdjackson/memscene/utils"
-	"github.com/gocarina/gocsv"
 	"io"
 	"math"
 	"os"
 	"strings"
+
+	"github.com/andrewdjackson/memscene/utils"
+	"github.com/gocarina/gocsv"
 )
 
 // Mems-Rosco logs are in CSV format with a .TXT extension
@@ -89,7 +90,7 @@ type MemsRosco struct {
 	scenario  *Scenario
 	file      *os.File
 	memsData  []*MemsData
-	roscoData []*MemsRoscoDataStructure
+	roscoData []*MemsRoscoData
 }
 
 // NewMemsRosco create a new MemsRosco instance
@@ -147,7 +148,7 @@ func (scenario *Scenario) ConvertCSVToMemsFCR(filepath string) {
 // Recreate the Dataframe HEX data from the parameters
 // The CSV data fields are calculated from the raw data, we need to undo
 // those computations
-func (memsrosco *MemsRosco) recreateDataframes(data *roscoData) {
+func (memsrosco *MemsRosco) recreateDataframes(data MemsRoscoData) {
 	// undo all the computations and put all data back into integer/hex format
 	df80 := fmt.Sprintf("801C"+
 		"%04x%02x%02x%02x%02x%02x%02x%02x%02x%02x"+
