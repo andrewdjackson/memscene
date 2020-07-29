@@ -2,6 +2,7 @@ package scenarios
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math"
@@ -15,6 +16,7 @@ import (
 // Mems-Rosco logs are in CSV format with a .TXT extension
 // in the format:
 //
+
 // Ecu Id:
 // #time,engine-rpm,coolant_temp,ambient_temp,intake_air_temp,fuel_temp,map_kpa,battery_voltage,throttle_pot_voltage,idle_switch,uk1,park_neutral_switch,fault_codes
 //    idle_set_point,idle_hot,uk2,iac_position,idle_error,ignition_advance_offset,ignition_advance,coil_time,crancs,uk4,uk5,ignition_switch,
@@ -34,9 +36,9 @@ type MemsRoscoData struct {
 	ManifoldAbsolutePressure float32 `csv:"map_kpa"`
 	BatteryVoltage           float32 `csv:"battery_voltage"`
 	ThrottlePotSensor        float32 `csv:"throttle_pot_voltage"`
-	IdleSwitch               bool    `csv:"idle_switch"`
-	AirconSwitch             bool    `csv:"uk1"`
-	ParkNeutralSwitch        bool    `csv:"park_neutral_switch"`
+	IdleSwitch               int     `csv:"idle_switch"`
+	AirconSwitch             int     `csv:"uk1"`
+	ParkNeutralSwitch        int     `csv:"park_neutral_switch"`
 	DTC0                     int     `csv:"fault_codes"`
 	DTC1                     int     `csv:"-"`
 	IdleSetPoint             int     `csv:"idle_set_point"`
@@ -47,10 +49,10 @@ type MemsRoscoData struct {
 	IgnitionAdvanceOffset80  int     `csv:"ignition_advance_offset"`
 	IgnitionAdvance          float32 `csv:"ignition_advance"`
 	CoilTime                 float32 `csv:"coil_time"`
-	CrankshaftPositionSensor bool    `csv:"crancs"`
+	CrankshaftPositionSensor int     `csv:"crancs"`
 	Uk801a                   int     `csv:"uk4"`
 	Uk801b                   int     `csv:"uk5"`
-	IgnitionSwitch           bool    `csv:"ignition_switch"`
+	IgnitionSwitch           int     `csv:"ignition_switch"`
 	ThrottleAngle            int     `csv:"throttle_angle"`
 	Uk7d03                   int     `csv:"uk6"`
 	AirFuelRatio             float32 `csv:"air_fuel_ratio"`
@@ -59,7 +61,7 @@ type MemsRoscoData struct {
 	LambdaFrequency          int     `csv:"lambda_sensor_frequency"`
 	LambdaDutycycle          int     `csv:"lambda_sensor_dutycycle"`
 	LambdaStatus             int     `csv:"lambda_sensor_status"`
-	ClosedLoop               bool    `csv:"closed_loop"`
+	ClosedLoop               int     `csv:"closed_loop"`
 	LongTermFuelTrim         int     `csv:"long_term_fuel_trim"`
 	ShortTermFuelTrim        int     `csv:"short_term_fuel_trim"`
 	CarbonCanisterPurgeValve int     `csv:"carbon_canister_dutycycle"`
@@ -87,9 +89,9 @@ type MemsRoscoData struct {
 
 // MemsRosco structure
 type MemsRosco struct {
-	scenario  *Scenario
-	file      *os.File
-	memsData  []*MemsData
+	scenario *Scenario
+	file     *os.File
+	//memsData  []*MemsData
 	roscoData []*MemsRoscoData
 }
 
@@ -109,14 +111,22 @@ func (memsrosco *MemsRosco) Convert(filepath string) *Scenario {
 	memsrosco.openFile(filepath)
 
 	// marshall into the correct format
-	roscofile, _ := newLineSkipDecoder(memsrosco.file, 3)
+	roscofile, _ := newLineSkipDecoder(memsrosco.file, 1)
 
 	if err := gocsv.UnmarshalDecoder(roscofile, &memsrosco.roscoData); err != nil {
 		utils.LogE.Printf("unable to parse file %s", err)
 	} else {
 		scenario.Count = len(memsrosco.roscoData)
 		utils.LogI.Printf("loaded scenario %s (%d dataframes)", filepath, scenario.Count)
+
+		// recreate the Dataframes from the CSV values
+		for _, m := range memsrosco.roscoData {
+			memsrosco.recreateDataframes(m)
+		}
 	}
+
+	i, _ := json.Marshal(memsrosco.roscoData)
+	json.Unmarshal(i, &scenario.Memsdata)
 
 	return memsrosco.scenario
 }
@@ -132,23 +142,22 @@ func (memsrosco *MemsRosco) openFile(filepath string) {
 	}
 }
 
-// ConvertCSVToMemsFCR takes Readmems CSV files and converts them into MemsFCR format
-/*
-func (scenario *Scenario) ConvertCSVToMemsFCR(filepath string) {
-	// load the Readmems CSV
-	scenario.Load(filepath)
-
-	// recreate the Dataframes from the CSV values
-	for _, m := range scenario.Memsdata {
-		scenario.recreateDataframes(m)
+func newLineSkipDecoder(r io.Reader, LinesToSkip int) (gocsv.SimpleDecoder, error) {
+	reader := csv.NewReader(r)
+	reader.FieldsPerRecord = -1
+	for i := 0; i < LinesToSkip; i++ {
+		if _, err := reader.Read(); err != nil {
+			return nil, err
+		}
 	}
+	reader.FieldsPerRecord = 0
+	return gocsv.NewSimpleDecoderFromCSVReader(reader), nil
 }
-*/
 
 // Recreate the Dataframe HEX data from the parameters
 // The CSV data fields are calculated from the raw data, we need to undo
 // those computations
-func (memsrosco *MemsRosco) recreateDataframes(data MemsRoscoData) {
+func (memsrosco *MemsRosco) recreateDataframes(data *MemsRoscoData) {
 	// undo all the computations and put all data back into integer/hex format
 	df80 := fmt.Sprintf("801C"+
 		"%04x%02x%02x%02x%02x%02x%02x%02x%02x%02x"+
@@ -162,9 +171,9 @@ func (memsrosco *MemsRosco) recreateDataframes(data MemsRoscoData) {
 		uint8(data.ManifoldAbsolutePressure),
 		uint8(data.BatteryVoltage*10),
 		uint8(data.ThrottlePotSensor/0.02),
-		utils.ConvertBooltoInt(data.IdleSwitch),
-		utils.ConvertBooltoInt(data.AirconSwitch),
-		utils.ConvertBooltoInt(data.ParkNeutralSwitch),
+		uint8(data.IdleSwitch),
+		uint8(data.AirconSwitch),
+		uint8(data.ParkNeutralSwitch),
 		uint8(data.DTC0),
 		uint8(data.DTC1),
 		uint8(data.IdleSetPoint),
@@ -175,7 +184,7 @@ func (memsrosco *MemsRosco) recreateDataframes(data MemsRoscoData) {
 		uint8(data.IgnitionAdvanceOffset80),
 		uint8((data.IgnitionAdvance*2)+24),
 		uint16(data.CoilTime/0.002),
-		utils.ConvertBooltoInt(data.CrankshaftPositionSensor),
+		uint8(data.CrankshaftPositionSensor),
 		uint8(data.Uk801a),
 		uint8(data.Uk801b),
 	)
@@ -184,7 +193,7 @@ func (memsrosco *MemsRosco) recreateDataframes(data MemsRoscoData) {
 		"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x"+
 		"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x"+
 		"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-		utils.ConvertBooltoInt(data.IgnitionSwitch),
+		uint8(data.IgnitionSwitch),
 		uint8(data.ThrottleAngle/6*10),
 		uint8(data.Uk7d03),
 		uint8(data.AirFuelRatio*10),
@@ -193,7 +202,7 @@ func (memsrosco *MemsRosco) recreateDataframes(data MemsRoscoData) {
 		uint8(data.LambdaFrequency),
 		uint8(data.LambdaDutycycle),
 		uint8(data.LambdaStatus),
-		utils.ConvertBooltoInt(data.ClosedLoop),
+		uint8(data.ClosedLoop),
 		uint8(data.LongTermFuelTrim),
 		uint8(data.ShortTermFuelTrim),
 		uint8(data.CarbonCanisterPurgeValve),
@@ -222,16 +231,4 @@ func (memsrosco *MemsRosco) recreateDataframes(data MemsRoscoData) {
 
 	fmt.Printf("0x80: %s\n", data.Dataframe80)
 	fmt.Printf("0x7d: %s\n", data.Dataframe7d)
-}
-
-func newLineSkipDecoder(r io.Reader, LinesToSkip int) (gocsv.SimpleDecoder, error) {
-	reader := csv.NewReader(r)
-	reader.FieldsPerRecord = -1
-	for i := 0; i < LinesToSkip; i++ {
-		if _, err := reader.Read(); err != nil {
-			return nil, err
-		}
-	}
-	reader.FieldsPerRecord = 0
-	return gocsv.NewSimpleDecoderFromCSVReader(reader), nil
 }
