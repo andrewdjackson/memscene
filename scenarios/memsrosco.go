@@ -89,9 +89,8 @@ type MemsRoscoData struct {
 
 // MemsRosco structure
 type MemsRosco struct {
-	scenario *Scenario
-	file     *os.File
-	//memsData  []*MemsData
+	scenario  *Scenario
+	file      *os.File
 	roscoData []*MemsRoscoData
 }
 
@@ -105,8 +104,6 @@ func NewMemsRosco() *MemsRosco {
 
 // Convert takes Readmems Log files and converts them into MemsFCR format
 func (memsrosco *MemsRosco) Convert(filepath string) *Scenario {
-	scenario := NewScenario()
-
 	// open the file
 	memsrosco.openFile(filepath)
 
@@ -116,8 +113,8 @@ func (memsrosco *MemsRosco) Convert(filepath string) *Scenario {
 	if err := gocsv.UnmarshalDecoder(roscofile, &memsrosco.roscoData); err != nil {
 		utils.LogE.Printf("unable to parse file %s", err)
 	} else {
-		scenario.Count = len(memsrosco.roscoData)
-		utils.LogI.Printf("loaded scenario %s (%d dataframes)", filepath, scenario.Count)
+		memsrosco.scenario.Count = len(memsrosco.roscoData)
+		utils.LogI.Printf("loaded scenario %s (%d dataframes)", filepath, memsrosco.scenario.Count)
 
 		// recreate the Dataframes from the CSV values
 		for _, m := range memsrosco.roscoData {
@@ -126,7 +123,7 @@ func (memsrosco *MemsRosco) Convert(filepath string) *Scenario {
 	}
 
 	i, _ := json.Marshal(memsrosco.roscoData)
-	json.Unmarshal(i, &scenario.Memsdata)
+	json.Unmarshal(i, &memsrosco.scenario.Memsdata)
 
 	return memsrosco.scenario
 }
@@ -135,7 +132,7 @@ func (memsrosco *MemsRosco) Convert(filepath string) *Scenario {
 func (memsrosco *MemsRosco) openFile(filepath string) {
 	var err error
 
-	memsrosco.file, err = os.OpenFile(filepath, os.O_RDWR|os.O_CREATE, os.ModePerm)
+	memsrosco.file, err = os.OpenFile(filepath, os.O_RDONLY, os.ModePerm)
 
 	if err != nil {
 		utils.LogE.Printf("unable to open %s", err)

@@ -9,27 +9,38 @@ import (
 )
 
 func main() {
-	file := flag.String("file", "", "file to convert")
-	convert := flag.String("type", "none", "use 'readmems' to convert from readmems log,\n'memsrosco' to convert from mems-rosco csv")
-	output := flag.String("output", "", "destination file")
+	var file string
+	var output string
+
+	flag.StringVar(&file, "file", "", "file to convert")
+	flag.StringVar(&output, "output", "", "destination file")
 	flag.Parse()
 
-	utils.LogI.Printf("using command line, file: %s, type: %s", *file, *convert)
+	filetype := utils.GetFileType(file)
+	utils.LogI.Printf("file identified as '%s' type", filetype)
+
+	if filetype == utils.Unknown {
+		utils.LogE.Fatalf("Unknown file type")
+	}
 
 	scenario := scenarios.NewScenario()
 
 	// convert the file and exit
-	switch *convert {
-	case "readmems":
+	switch filetype {
+	case utils.ReadMemsFile:
 		utils.LogI.Printf("converting from readmems file to MemsFCR")
 		r := scenarios.NewReadMems()
-		scenario = r.Convert(*file)
-	case "memsrosco":
+		scenario = r.Convert(file)
+	case utils.MemsRoscoFile:
 		utils.LogI.Printf("converting from memsrosco file to MemsFCR")
 		r := scenarios.NewMemsRosco()
-		scenario = r.Convert(*file)
+		scenario = r.Convert(file)
+	case utils.MemsFCRFile:
+		utils.LogI.Printf("file already in MemsFCR format")
 	}
 
-	save := fmt.Sprintf("%s", *output)
-	scenario.SaveCSVFile(save)
+	if scenario.Count > 0 {
+		save := fmt.Sprintf("%s", output)
+		scenario.SaveCSVFile(save)
+	}
 }

@@ -59,6 +59,7 @@ func (readmems *ReadMems) Convert(filepath string) *Scenario {
 				startTime = startTime.Add(1 * time.Second)
 				readmems.memsdata.Time = startTime.Format("15:04:05")
 				readmems.scenario.Memsdata = append(readmems.scenario.Memsdata, readmems.memsdata)
+				readmems.scenario.Count++
 			}
 		}
 	}

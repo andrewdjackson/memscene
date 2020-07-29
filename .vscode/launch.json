@@ -9,9 +9,9 @@
 			"program": "${fileDirname}",
 			"env": {},
 			"args": [
-				"-file=data/memsrosco.txt",
+				"-file=data/readmems.data",
 				"-type=memsrosco",
-				"-output=test.csv"
+				"-output=memsrosco.csv"
 			]
 		}
 	]
