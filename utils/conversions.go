@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/csv"
 	"io"
+	"math"
 
 	"github.com/gocarina/gocsv"
 )
@@ -14,6 +15,11 @@ func ConvertBooltoInt(b bool) uint8 {
 	}
 
 	return 0
+}
+
+// RoundTo2DecimalPoints rounds to 2 dp
+func RoundTo2DecimalPoints(x float32) float32 {
+	return float32(math.Round(float64(x)*100) / 100)
 }
 
 // NewLineSkipDecoder skips lines in the file

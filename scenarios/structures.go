@@ -3,7 +3,7 @@ package scenarios
 // MemsFCRData is the mems information computed from dataframes 0x80 and 0x7d
 type MemsFCRData struct {
 	Time                     string  `csv:"#time"`
-	EngineRPM                uint16  `csv:"80x01-02_engine-rpm"`
+	EngineRPM                int     `csv:"80x01-02_engine-rpm"`
 	CoolantTemp              int     `csv:"80x03_coolant_temp"`
 	AmbientTemp              int     `csv:"80x04_ambient_temp"`
 	IntakeAirTemp            int     `csv:"80x05_intake_air_temp"`
@@ -14,13 +14,13 @@ type MemsFCRData struct {
 	IdleSwitch               bool    `csv:"80x0A_idle_switch"`
 	AirconSwitch             bool    `csv:"80x0B_uk1"`
 	ParkNeutralSwitch        bool    `csv:"80x0C_park_neutral_switch"`
-	DTC0                     int     `csv:"80x0D-0E_fault_codes"`
-	DTC1                     int     `csv:"-"`
+	DTC0                     uint8   `csv:"80x0D-0E_fault_codes"`
+	DTC1                     uint8   `csv:"-"`
 	IdleSetPoint             int     `csv:"80x0F_idle_set_point"`
 	IdleHot                  int     `csv:"80x10_idle_hot"`
 	Uk8011                   int     `csv:"80x11_uk2"`
 	IACPosition              int     `csv:"80x12_iac_position"`
-	IdleSpeedDeviation       uint16  `csv:"80x13-14_idle_error"`
+	IdleSpeedDeviation       int     `csv:"80x13-14_idle_error"`
 	IgnitionAdvanceOffset80  int     `csv:"80x15_ignition_advance_offset"`
 	IgnitionAdvance          float32 `csv:"80x16_ignition_advance"`
 	CoilTime                 float32 `csv:"80x17-18_coil_time"`
@@ -31,7 +31,7 @@ type MemsFCRData struct {
 	ThrottleAngle            int     `csv:"7dx02_throttle_angle"`
 	Uk7d03                   int     `csv:"7dx03_uk6"`
 	AirFuelRatio             float32 `csv:"7dx04_air_fuel_ratio"`
-	DTC2                     int     `csv:"7dx05_dtc2"`
+	DTC2                     uint8   `csv:"7dx05_dtc2"`
 	LambdaVoltage            int     `csv:"7dx06_lambda_voltage"`
 	LambdaFrequency          int     `csv:"7dx07_lambda_sensor_frequency"`
 	LambdaDutycycle          int     `csv:"7dx08_lambda_sensor_dutycycle"`
@@ -40,15 +40,15 @@ type MemsFCRData struct {
 	LongTermFuelTrim         int     `csv:"7dx0B_long_term_fuel_trim"`
 	ShortTermFuelTrim        int     `csv:"7dx0C_short_term_fuel_trim"`
 	CarbonCanisterPurgeValve int     `csv:"7dx0D_carbon_canister_dutycycle"`
-	DTC3                     int     `csv:"7dx0E_dtc3"`
+	DTC3                     uint8   `csv:"7dx0E_dtc3"`
 	IdleBasePosition         int     `csv:"7dx0F_idle_base_pos"`
 	Uk7d10                   int     `csv:"7dx10_uk7"`
-	DTC4                     int     `csv:"7dx11_dtc4"`
+	DTC4                     uint8   `csv:"7dx11_dtc4"`
 	IgnitionAdvanceOffset7d  int     `csv:"7dx12_ignition_advance2"`
 	IdleSpeedOffset          int     `csv:"7dx13_idle_speed_offset"`
 	Uk7d14                   int     `csv:"7dx14_idle_error2"`
 	Uk7d15                   int     `csv:"7dx14-15_uk10"`
-	DTC5                     int     `csv:"7dx16_dtc5"`
+	DTC5                     uint8   `csv:"7dx16_dtc5"`
 	Uk7d17                   int     `csv:"7dx17_uk11"`
 	Uk7d18                   int     `csv:"7dx18_uk12"`
 	Uk7d19                   int     `csv:"7dx19_uk13"`
@@ -203,3 +203,91 @@ type MemsRoscoV2Data struct {
 	Dataframe7d              string  `csv:"-"`
 	Dataframe80              string  `csv:"-"`
 }
+
+type (
+	// DataFrame7d data sequence returned by the ECU in reply to the command 0x7D.
+	// This structure represents the raw data from the ECU
+	//
+	DataFrame7d struct {
+		Command                  uint8
+		BytesinFrame             uint8 // 7dx00
+		IgnitionSwitch           uint8 // 7dx01
+		ThrottleAngle            uint8 // 7dx03
+		Uk7d03                   uint8 // 7dx03
+		AirFuelRatio             uint8 // 7dx04
+		Dtc2                     uint8 // 7dx05
+		LambdaVoltage            uint8 // 7dx06
+		LambdaFrequency          uint8 // 7dx07
+		LambdaDutyCycle          uint8 // 7dx08
+		LambdaStatus             uint8 // 7dx09
+		LoopIndicator            uint8 // 7dx0A
+		LongTermFuelTrim         uint8 // 7dx0B
+		ShortTermFuelTrim        uint8 // 7dx0C
+		CarbonCanisterPurgeValve uint8 // 7dx0D
+		Dtc3                     uint8 // 7dx0E
+		IdleBasePos              uint8 // 7dx0F
+		Uk7d10                   uint8 // 7dx10
+		Dtc4                     uint8 // 7dx11
+		IgnitionAdvanceOffset7d  uint8 // 7dx12
+		IdleSpeedOffset          uint8 // 7dx13
+		Uk7d14                   uint8 // 7dx14
+		Uk7d15                   uint8 // 7dx15
+		Dtc5                     uint8 // 7dx16
+		Uk7d17                   uint8 // 7dx17
+		Uk7d18                   uint8 // 7dx18
+		Uk7d19                   uint8 // 7dx19
+		Uk7d1a                   uint8 // 7dx1a
+		Uk7d1b                   uint8 // 7dx1b
+		Uk7d1c                   uint8 // 7dx1c
+		Uk7d1d                   uint8 // 7dx1d
+		Uk7d1e                   uint8 // 7dx1e
+		JackCount                uint8 // 7dx1f
+	}
+)
+
+type (
+	// DataFrame80 data sequence returned by the ECU in reply to the command 0x80.
+	// This structure represents the raw data from the ECU
+	//
+	DataFrame80 struct {
+		Command                  uint8
+		BytesinFrame             uint8  // 80x00
+		EngineRpm                uint16 // 80x01 - 80x02
+		CoolantTemp              uint8  // 80x03
+		AmbientTemp              uint8  // 80x04
+		IntakeAirTemp            uint8  // 80x05
+		FuelTemp                 uint8  // 80x06
+		ManifoldAbsolutePressure uint8  // 80x07
+		BatteryVoltage           uint8  // 80x08
+		ThrottlePotSensor        uint8  // 80x09
+		IdleSwitch               uint8  // 80x0A
+		AirconSwitch             uint8  // 80x0B
+		ParkNeutralSwitch        uint8  // 80x0C
+		Dtc0                     uint8  // 80x0D  Bit 0: Coolant temp sensor fault (Code 1) Bit 1: Inlet air temp sensor fault (Code 2)
+		Dtc1                     uint8  // 80x0E  Bit 1: Fuel pump circuit fault (Code 10)  Bit 7: Throttle pot circuit fault (Code 16)
+		IdleSetPoint             uint8  // 80x0F
+		IdleHot                  uint8  // 80x10
+		Uk8011                   uint8  // 80x11
+		IacPosition              uint8  // 80x12
+		IdleSpeedDeviation       uint16 // 80x13 - 80x14
+		IgnitionAdvanceOffset80  uint8  // 80x15
+		IgnitionAdvance          uint8  // 80x16
+		CoilTime                 uint16 // 80x17 - 80x18
+		CrankshaftPositionSensor uint8  // 80x19
+		Uk801a                   uint8  // 80x1A
+		Uk801b                   uint8  // 80x1B
+	}
+)
+
+const (
+	// AirSensorFaultCode 0x80 DTC0 Fault
+	AirSensorFaultCode = byte(0b00000001)
+	// CoolantSensorFaultCode 0x80 DTC0 Fault
+	CoolantSensorFaultCode = byte(0b00000010)
+	// FuelPumpFaultCode 0x80 DTC1 Fault
+	FuelPumpFaultCode = byte(0b00000001)
+	// ThrottlePotFaultCode 0x80 DTC1 Fault
+	ThrottlePotFaultCode = byte(0b01000000)
+	// IdleSwitchActive flag
+	IdleSwitchActive = byte(0b00001000)
+)
