@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"path/filepath"
 
 	"github.com/andrewdjackson/memscene/scenarios"
 	"github.com/andrewdjackson/memscene/utils"
@@ -15,6 +16,11 @@ func main() {
 	flag.StringVar(&file, "file", "", "file to convert")
 	flag.StringVar(&output, "output", "", "destination file")
 	flag.Parse()
+
+	if output == "" {
+		_, filename := filepath.Split(file)
+		output = fmt.Sprintf("%s.output.csv", filename)
+	}
 
 	filetype := utils.GetFileType(file)
 	utils.LogI.Printf("file identified as '%s' type", filetype)
