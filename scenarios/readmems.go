@@ -126,7 +126,7 @@ func (readmems *ReadMems) readResponseFile(path string) []string {
 // calculateMemsData reads the raw dataframes and returns structured data
 func (readmems *ReadMems) calculateMemsData(memsdata *MemsFCRData) {
 	d80, _ := hex.DecodeString(memsdata.Dataframe80)
-	d7d, _ := hex.DecodeString(memsdata.Dataframe80)
+	d7d, _ := hex.DecodeString(memsdata.Dataframe7d)
 
 	utils.LogI.Printf("%s getting x7d and x80 dataframes", utils.ECUCommandTrace)
 

@@ -75,7 +75,7 @@ func (memsrosco *MemsRosco) recreateDataframes(data *MemsRoscoData) {
 		uint8(data.DTC0),
 		uint8(data.DTC1),
 		uint8(data.IdleSetPoint),
-		uint8(data.IdleHot),
+		uint8(data.IdleHot+35),
 		uint8(data.Uk8011),
 		uint8(math.Round(float64(data.IACPosition)*1.8)),
 		uint16(data.IdleSpeedDeviation),
@@ -92,7 +92,7 @@ func (memsrosco *MemsRosco) recreateDataframes(data *MemsRoscoData) {
 		"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x"+
 		"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
 		uint8(data.IgnitionSwitch),
-		uint8(data.ThrottleAngle/6*10),
+		uint8(data.ThrottleAngle/60),
 		uint8(data.Uk7d03),
 		uint8(data.AirFuelRatio*10),
 		uint8(data.DTC2),
