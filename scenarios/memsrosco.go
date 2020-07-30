@@ -13,9 +13,9 @@ import (
 
 // MemsRosco structure
 type MemsRosco struct {
-	scenario  *Scenario
-	file      *os.File
-	roscoData []*MemsRoscoData
+	scenario *Scenario
+	file     *os.File
+	data     []*MemsRoscoData
 }
 
 // NewMemsRosco create a new MemsRosco instance
@@ -34,19 +34,19 @@ func (memsrosco *MemsRosco) Convert(filepath string) *Scenario {
 	// marshall into the correct format
 	roscofile, _ := utils.NewLineSkipDecoder(memsrosco.file, 1)
 
-	if err := gocsv.UnmarshalDecoder(roscofile, &memsrosco.roscoData); err != nil {
+	if err := gocsv.UnmarshalDecoder(roscofile, &memsrosco.data); err != nil {
 		utils.LogE.Printf("unable to parse file %s", err)
 	} else {
-		memsrosco.scenario.Count = len(memsrosco.roscoData)
+		memsrosco.scenario.Count = len(memsrosco.data)
 		utils.LogI.Printf("loaded scenario %s (%d dataframes)", filepath, memsrosco.scenario.Count)
 
 		// recreate the Dataframes from the CSV values
-		for _, m := range memsrosco.roscoData {
+		for _, m := range memsrosco.data {
 			memsrosco.recreateDataframes(m)
 		}
 	}
 
-	i, _ := json.Marshal(memsrosco.roscoData)
+	i, _ := json.Marshal(memsrosco.data)
 	json.Unmarshal(i, &memsrosco.scenario.Memsdata)
 
 	return memsrosco.scenario

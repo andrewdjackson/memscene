@@ -8,7 +8,7 @@
 			"mode": "auto",
 			"program": "${fileDirname}",
 			"env": {},
-			"args": ["-file=data/readmems.data"]
+			"args": ["-file=data/memsroscov2.txt"]
 		}
 	]
 }

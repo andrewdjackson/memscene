@@ -43,7 +43,7 @@ func main() {
 		scenario = r.Convert(file)
 	case utils.MemsRoscoFilev2:
 		utils.LogI.Printf("converting from memsrosco version 2 file to MemsFCR")
-		r := scenarios.NewMemsRosco()
+		r := scenarios.NewMemsRoscoV2()
 		scenario = r.Convert(file)
 	case utils.MemsDiagFile:
 		utils.LogW.Printf("unable to process memsdiag files, not enough data")

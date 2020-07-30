@@ -200,4 +200,6 @@ type MemsRoscoV2Data struct {
 	Uk7d1d                   int     `csv:"7dx1D_uk17"`
 	Uk7d1e                   int     `csv:"7dx1E_uk18"`
 	JackCount                int     `csv:"7dx1F_uk19"`
+	Dataframe7d              string  `csv:"-"`
+	Dataframe80              string  `csv:"-"`
 }
