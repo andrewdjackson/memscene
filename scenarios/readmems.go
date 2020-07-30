@@ -19,7 +19,7 @@ import (
 // ReadMems structure
 type ReadMems struct {
 	scenario *Scenario
-	memsdata *MemsData
+	memsdata *MemsFCRData
 }
 
 // NewReadMems create a new ReadMems instance
@@ -46,7 +46,7 @@ func (readmems *ReadMems) Convert(filepath string) *Scenario {
 			line = readmems.cleanCommandResponse(line)
 
 			if strings.HasPrefix(line, "80") {
-				readmems.memsdata = &MemsData{}
+				readmems.memsdata = &MemsFCRData{}
 				readmems.memsdata.Dataframe80 = line
 			}
 			if strings.HasPrefix(line, "7D") {

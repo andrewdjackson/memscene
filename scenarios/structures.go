@@ -1,7 +1,7 @@
 package scenarios
 
-// MemsData is the mems information computed from dataframes 0x80 and 0x7d
-type MemsData struct {
+// MemsFCRData is the mems information computed from dataframes 0x80 and 0x7d
+type MemsFCRData struct {
 	Time                     string  `csv:"#time"`
 	EngineRPM                uint16  `csv:"80x01-02_engine-rpm"`
 	CoolantTemp              int     `csv:"80x03_coolant_temp"`

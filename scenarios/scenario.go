@@ -11,7 +11,7 @@ import (
 type Scenario struct {
 	file *os.File
 	// Memsdata log
-	Memsdata []*MemsData
+	Memsdata []*MemsFCRData
 	// Position in the log
 	Position int
 	// Count of items in the log
@@ -22,7 +22,7 @@ type Scenario struct {
 func NewScenario() *Scenario {
 	scenario := &Scenario{}
 	// initialise the log
-	scenario.Memsdata = []*MemsData{}
+	scenario.Memsdata = []*MemsFCRData{}
 	// start at the beginning
 	scenario.Position = 0
 	// no items in the log
