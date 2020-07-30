@@ -1,10 +1,8 @@
 package scenarios
 
 import (
-	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"io"
 	"math"
 	"os"
 	"strings"
@@ -12,80 +10,6 @@ import (
 	"github.com/andrewdjackson/memscene/utils"
 	"github.com/gocarina/gocsv"
 )
-
-// Mems-Rosco logs are in CSV format with a .TXT extension
-// in the format:
-//
-
-// Ecu Id:
-// #time,engine-rpm,coolant_temp,ambient_temp,intake_air_temp,fuel_temp,map_kpa,battery_voltage,throttle_pot_voltage,idle_switch,uk1,park_neutral_switch,fault_codes
-//    idle_set_point,idle_hot,uk2,iac_position,idle_error,ignition_advance_offset,ignition_advance,coil_time,crancs,uk4,uk5,ignition_switch,
-//    throttle_angle,uk6,air_fuel_ratio,fault_code0,lambda_voltage_mv,lambda_sensor_frequency,lambda_sensor_dutycycle,lambda_sensor_status,closed_loop,
-//    long_term_fuel_trim,short_term_fuel_trim,carbon_canister_dutycycle,fault_code1,idle_base_pos,uk7,uk8,ignition_advance2,uk9,idle_error2,uk10,
-//    fault_code4,uk11,uk12,uk13,uk14,uk15,uk16,uk17,uk18,uk19
-//
-
-// MemsRoscoData is the mems information computed from dataframes 0x80 and 0x7d
-type MemsRoscoData struct {
-	Time                     string  `csv:"#time"`
-	EngineRPM                uint16  `csv:"engine-rpm"`
-	CoolantTemp              int     `csv:"coolant_temp"`
-	AmbientTemp              int     `csv:"ambient_temp"`
-	IntakeAirTemp            int     `csv:"intake_air_temp"`
-	FuelTemp                 int     `csv:"fuel_temp"`
-	ManifoldAbsolutePressure float32 `csv:"map_kpa"`
-	BatteryVoltage           float32 `csv:"battery_voltage"`
-	ThrottlePotSensor        float32 `csv:"throttle_pot_voltage"`
-	IdleSwitch               int     `csv:"idle_switch"`
-	AirconSwitch             int     `csv:"uk1"`
-	ParkNeutralSwitch        int     `csv:"park_neutral_switch"`
-	DTC0                     int     `csv:"fault_codes"`
-	DTC1                     int     `csv:"-"`
-	IdleSetPoint             int     `csv:"idle_set_point"`
-	IdleHot                  int     `csv:"idle_hot"`
-	Uk8011                   int     `csv:"uk2"`
-	IACPosition              int     `csv:"iac_position"`
-	IdleSpeedDeviation       uint16  `csv:"idle_error"`
-	IgnitionAdvanceOffset80  int     `csv:"ignition_advance_offset"`
-	IgnitionAdvance          float32 `csv:"ignition_advance"`
-	CoilTime                 float32 `csv:"coil_time"`
-	CrankshaftPositionSensor int     `csv:"crancs"`
-	Uk801a                   int     `csv:"uk4"`
-	Uk801b                   int     `csv:"uk5"`
-	IgnitionSwitch           int     `csv:"ignition_switch"`
-	ThrottleAngle            int     `csv:"throttle_angle"`
-	Uk7d03                   int     `csv:"uk6"`
-	AirFuelRatio             float32 `csv:"air_fuel_ratio"`
-	DTC2                     int     `csv:"fault_code0"`
-	LambdaVoltage            int     `csv:"lambda_voltage_mv"`
-	LambdaFrequency          int     `csv:"lambda_sensor_frequency"`
-	LambdaDutycycle          int     `csv:"lambda_sensor_dutycycle"`
-	LambdaStatus             int     `csv:"lambda_sensor_status"`
-	ClosedLoop               int     `csv:"closed_loop"`
-	LongTermFuelTrim         int     `csv:"long_term_fuel_trim"`
-	ShortTermFuelTrim        int     `csv:"short_term_fuel_trim"`
-	CarbonCanisterPurgeValve int     `csv:"carbon_canister_dutycycle"`
-	DTC3                     int     `csv:"fault_code1"`
-	IdleBasePosition         int     `csv:"idle_base_pos"`
-	Uk7d10                   int     `csv:"uk7"`
-	DTC4                     int     `csv:"uk8"`
-	IgnitionAdvanceOffset7d  int     `csv:"ignition_advance2"`
-	IdleSpeedOffset          int     `csv:"uk9"`
-	Uk7d14                   int     `csv:"idle_error2"`
-	Uk7d15                   int     `csv:"uk10"`
-	DTC5                     int     `csv:"fault_code4"`
-	Uk7d17                   int     `csv:"uk11"`
-	Uk7d18                   int     `csv:"uk12"`
-	Uk7d19                   int     `csv:"uk13"`
-	Uk7d1a                   int     `csv:"uk14"`
-	Uk7d1b                   int     `csv:"uk15"`
-	Uk7d1c                   int     `csv:"uk16"`
-	Uk7d1d                   int     `csv:"uk17"`
-	Uk7d1e                   int     `csv:"uk18"`
-	JackCount                int     `csv:"uk19"`
-	Dataframe7d              string  `csv:"-"`
-	Dataframe80              string  `csv:"-"`
-}
 
 // MemsRosco structure
 type MemsRosco struct {
@@ -105,10 +29,10 @@ func NewMemsRosco() *MemsRosco {
 // Convert takes Readmems Log files and converts them into MemsFCR format
 func (memsrosco *MemsRosco) Convert(filepath string) *Scenario {
 	// open the file
-	memsrosco.openFile(filepath)
+	memsrosco.file = utils.OpenFile(filepath)
 
 	// marshall into the correct format
-	roscofile, _ := newLineSkipDecoder(memsrosco.file, 1)
+	roscofile, _ := utils.NewLineSkipDecoder(memsrosco.file, 1)
 
 	if err := gocsv.UnmarshalDecoder(roscofile, &memsrosco.roscoData); err != nil {
 		utils.LogE.Printf("unable to parse file %s", err)
@@ -126,29 +50,6 @@ func (memsrosco *MemsRosco) Convert(filepath string) *Scenario {
 	json.Unmarshal(i, &memsrosco.scenario.Memsdata)
 
 	return memsrosco.scenario
-}
-
-// Open the CSV  file
-func (memsrosco *MemsRosco) openFile(filepath string) {
-	var err error
-
-	memsrosco.file, err = os.OpenFile(filepath, os.O_RDONLY, os.ModePerm)
-
-	if err != nil {
-		utils.LogE.Printf("unable to open %s", err)
-	}
-}
-
-func newLineSkipDecoder(r io.Reader, LinesToSkip int) (gocsv.SimpleDecoder, error) {
-	reader := csv.NewReader(r)
-	reader.FieldsPerRecord = -1
-	for i := 0; i < LinesToSkip; i++ {
-		if _, err := reader.Read(); err != nil {
-			return nil, err
-		}
-	}
-	reader.FieldsPerRecord = 0
-	return gocsv.NewSimpleDecoderFromCSVReader(reader), nil
 }
 
 // Recreate the Dataframe HEX data from the parameters
@@ -226,6 +127,6 @@ func (memsrosco *MemsRosco) recreateDataframes(data *MemsRoscoData) {
 	data.Dataframe7d = strings.ToUpper(df7d)
 	data.Dataframe80 = strings.ToUpper(df80)
 
-	fmt.Printf("0x80: %s\n", data.Dataframe80)
-	fmt.Printf("0x7d: %s\n", data.Dataframe7d)
+	//fmt.Printf("0x80: %s\n", data.Dataframe80)
+	//fmt.Printf("0x7d: %s\n", data.Dataframe7d)
 }
