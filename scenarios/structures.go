@@ -62,6 +62,68 @@ type MemsFCRData struct {
 	Dataframe80              string  `csv:"0x80_raw"`
 }
 
+// MemsFCRRawData structure used for reprocessing raw data
+type MemsFCRRawData struct {
+	Time                     string  `csv:"#time"`
+	EngineRPM                int     `csv:"-"`
+	CoolantTemp              int     `csv:"-"`
+	AmbientTemp              int     `csv:"-"`
+	IntakeAirTemp            int     `csv:"-"`
+	FuelTemp                 int     `csv:"-"`
+	ManifoldAbsolutePressure float32 `csv:"-"`
+	BatteryVoltage           float32 `csv:"-"`
+	ThrottlePotSensor        float32 `csv:"-"`
+	IdleSwitch               bool    `csv:"-"`
+	AirconSwitch             bool    `csv:"-"`
+	ParkNeutralSwitch        bool    `csv:"-"`
+	DTC0                     uint8   `csv:"-"`
+	DTC1                     uint8   `csv:"-"`
+	IdleSetPoint             int     `csv:"-"`
+	IdleHot                  int     `csv:"-"`
+	Uk8011                   int     `csv:"-"`
+	IACPosition              int     `csv:"-"`
+	IdleSpeedDeviation       int     `csv:"-"`
+	IgnitionAdvanceOffset80  int     `csv:"-"`
+	IgnitionAdvance          float32 `csv:"-"`
+	CoilTime                 float32 `csv:"-"`
+	CrankshaftPositionSensor bool    `csv:"-"`
+	Uk801a                   int     `csv:"-"`
+	Uk801b                   int     `csv:"-"`
+	IgnitionSwitch           bool    `csv:"-"`
+	ThrottleAngle            int     `csv:"-"`
+	Uk7d03                   int     `csv:"-"`
+	AirFuelRatio             float32 `csv:"-"`
+	DTC2                     uint8   `csv:"-"`
+	LambdaVoltage            int     `csv:"-"`
+	LambdaFrequency          int     `csv:"-"`
+	LambdaDutycycle          int     `csv:"-"`
+	LambdaStatus             int     `csv:"-"`
+	ClosedLoop               bool    `csv:"-"`
+	LongTermFuelTrim         int     `csv:"-"`
+	ShortTermFuelTrim        int     `csv:"-"`
+	CarbonCanisterPurgeValve int     `csv:"-"`
+	DTC3                     uint8   `csv:"-"`
+	IdleBasePosition         int     `csv:"-"`
+	Uk7d10                   int     `csv:"-"`
+	DTC4                     uint8   `csv:"-"`
+	IgnitionAdvanceOffset7d  int     `csv:"-"`
+	IdleSpeedOffset          int     `csv:"-"`
+	Uk7d14                   int     `csv:"-"`
+	Uk7d15                   int     `csv:"-"`
+	DTC5                     uint8   `csv:"-"`
+	Uk7d17                   int     `csv:"-"`
+	Uk7d18                   int     `csv:"-"`
+	Uk7d19                   int     `csv:"-"`
+	Uk7d1a                   int     `csv:"-"`
+	Uk7d1b                   int     `csv:"-"`
+	Uk7d1c                   int     `csv:"-"`
+	Uk7d1d                   int     `csv:"-"`
+	Uk7d1e                   int     `csv:"-"`
+	JackCount                int     `csv:"-"`
+	Dataframe7d              string  `csv:"0x7d_raw"`
+	Dataframe80              string  `csv:"0x80_raw"`
+}
+
 // MemsRoscoData mems-rosco logs are in CSV format with a .TXT extension in the format:
 //
 // Ecu Id:

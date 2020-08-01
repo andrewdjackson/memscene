@@ -48,7 +48,9 @@ func main() {
 	case utils.MemsDiagFile:
 		utils.LogW.Printf("unable to process memsdiag files, not enough data")
 	case utils.MemsFCRFile:
-		utils.LogI.Printf("file already in MemsFCR format")
+		utils.LogI.Printf("reprocessing MemsFCR file")
+		r := scenarios.NewMemsFCR()
+		scenario = r.Convert(file)
 	}
 
 	if scenario.Count > 0 {
