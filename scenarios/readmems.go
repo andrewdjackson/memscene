@@ -150,11 +150,11 @@ func (readmems *ReadMems) calculateMemsData(memsdata *MemsFCRData) {
 
 	// calculate IAC postion, 0 closed - 180 fully open
 	// convert to %
-	iac := math.Round(float64(df80.IacPosition) / 1.8)
-	if iac > 100 {
-		// if value is > 100% then cap it
-		iac = 100
-	}
+	//iac := math.Round(float64(df80.IacPosition) / 1.8)
+	//if iac > 100 {
+	// if value is > 100% then cap it
+	//	iac = 100
+	//}
 
 	// build the Mems Data frame using the raw data and applying the relevant
 	// adjustments and calculations
@@ -167,7 +167,7 @@ func (readmems *ReadMems) calculateMemsData(memsdata *MemsFCRData) {
 		FuelTemp:                 int(df80.FuelTemp) - 55,
 		ManifoldAbsolutePressure: float32(df80.ManifoldAbsolutePressure),
 		BatteryVoltage:           float32(df80.BatteryVoltage) / 10,
-		ThrottlePotSensor:        utils.RoundTo2DecimalPoints(float32(df80.ThrottlePotSensor) * 0.02),
+		ThrottlePotSensor:        roundTo2DecimalPoints(float32(df80.ThrottlePotSensor) * 0.02),
 		IdleSwitch:               bool(df80.IdleSwitch&IdleSwitchActive != 0),
 		AirconSwitch:             bool(df80.AirconSwitch != 0),
 		ParkNeutralSwitch:        bool(df80.ParkNeutralSwitch != 0),
@@ -179,7 +179,7 @@ func (readmems *ReadMems) calculateMemsData(memsdata *MemsFCRData) {
 		IdleSpeedDeviation:       int(df80.IdleSpeedDeviation),
 		IgnitionAdvanceOffset80:  int(df80.IgnitionAdvanceOffset80),
 		IgnitionAdvance:          (float32(df80.IgnitionAdvance) / 2) - 24,
-		CoilTime:                 utils.RoundTo2DecimalPoints(float32(df80.CoilTime) * 0.002),
+		CoilTime:                 roundTo2DecimalPoints(float32(df80.CoilTime) * 0.002),
 		CrankshaftPositionSensor: bool(df80.CrankshaftPositionSensor != 0),
 		IgnitionSwitch:           bool(df7d.IgnitionSwitch != 0),
 		ThrottleAngle:            int(math.Round(float64(df7d.ThrottleAngle) * 6 / 10)),
@@ -197,7 +197,7 @@ func (readmems *ReadMems) calculateMemsData(memsdata *MemsFCRData) {
 		IdleBasePosition:         int(df7d.IdleBasePos),
 		DTC4:                     df7d.Dtc4,
 		IgnitionAdvanceOffset7d:  int(df7d.IgnitionAdvanceOffset7d) - 48,
-		IdleSpeedOffset:          (int(df7d.IdleSpeedOffset) - 128) * 25,
+		IdleSpeedOffset:          int(df7d.IdleSpeedOffset), // - 128) * 25,
 		DTC5:                     df7d.Dtc5,
 		JackCount:                int(df7d.JackCount),
 		Dataframe80:              hex.EncodeToString(d80),
@@ -205,4 +205,8 @@ func (readmems *ReadMems) calculateMemsData(memsdata *MemsFCRData) {
 	}
 
 	utils.LogI.Printf("%s built mems dataframe %v", utils.ECUCommandTrace, readmems.memsdata)
+}
+
+func roundTo2DecimalPoints(x float32) float32 {
+	return float32(math.Round(float64(x)*100) / 100)
 }

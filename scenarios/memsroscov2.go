@@ -47,7 +47,7 @@ func (memsrosco *MemsRoscoV2) Convert(filepath string) *Scenario {
 	}
 
 	i, _ := json.Marshal(memsrosco.data)
-	json.Unmarshal(i, &memsrosco.scenario.Memsdata)
+	_ = json.Unmarshal(i, &memsrosco.scenario.Memsdata)
 
 	return memsrosco.scenario
 }
@@ -77,7 +77,7 @@ func (memsrosco *MemsRoscoV2) recreateDataframes(data *MemsRoscoV2Data) {
 		uint8(data.IdleSetPoint),
 		uint8(data.IdleHot),
 		uint8(data.Uk8011),
-		uint8(math.Round(float64(data.IACPosition)*1.8)),
+		uint8(math.Round(float64(data.IACPosition))),
 		uint16(data.IdleSpeedDeviation),
 		uint8(data.IgnitionAdvanceOffset80),
 		uint8((data.IgnitionAdvance*2)+24),

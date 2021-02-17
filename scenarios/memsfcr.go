@@ -45,7 +45,7 @@ func (memsfcr *MemsFCR) Convert(filepath string) *Scenario {
 	}
 
 	i, _ := json.Marshal(memsfcr.data)
-	json.Unmarshal(i, &memsfcr.scenario.Memsdata)
+	_ = json.Unmarshal(i, &memsfcr.scenario.Memsdata)
 
 	return memsfcr.scenario
 }
@@ -74,11 +74,11 @@ func (memsfcr *MemsFCR) calculateMemsData(memsdata *MemsFCRRawData) {
 
 	// calculate IAC postion, 0 closed - 180 fully open
 	// convert to %
-	iac := math.Round(float64(df80.IacPosition) / 1.8)
-	if iac > 100 {
-		// if value is > 100% then cap it
-		iac = 100
-	}
+	//iac := math.Round(float64(df80.IacPosition) / 1.8)
+	//if iac > 100 {
+	// if value is > 100% then cap it
+	//	iac = 100
+	//}
 
 	// build the Mems Data frame using the raw data and applying the relevant
 	// adjustments and calculations

@@ -47,7 +47,7 @@ func (memsrosco *MemsRosco) Convert(filepath string) *Scenario {
 	}
 
 	i, _ := json.Marshal(memsrosco.data)
-	json.Unmarshal(i, &memsrosco.scenario.Memsdata)
+	_ = json.Unmarshal(i, &memsrosco.scenario.Memsdata)
 
 	return memsrosco.scenario
 }

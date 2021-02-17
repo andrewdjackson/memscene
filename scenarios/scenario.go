@@ -9,7 +9,6 @@ import (
 
 // Scenario represents the scenario data
 type Scenario struct {
-	file *os.File
 	// Memsdata log
 	Memsdata []*MemsFCRData
 	// Position in the log
