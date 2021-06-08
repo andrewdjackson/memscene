@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"path/filepath"
 
 	"github.com/andrewdjackson/memscene/scenarios"
@@ -16,6 +17,11 @@ func main() {
 	flag.StringVar(&file, "file", "", "file to convert")
 	flag.StringVar(&output, "output", "", "destination file")
 	flag.Parse()
+
+	if file == "" {
+		fmt.Println("Usage of ./memscene:\n  -file string\n        file to convert\n  -output string\n        destination file\n")
+		log.Fatalf("")
+	}
 
 	if output == "" {
 		_, filename := filepath.Split(file)
